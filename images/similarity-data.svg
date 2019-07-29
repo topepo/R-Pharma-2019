@@ -1,17 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="184 297.25 393.5 225.25" width="393.5" height="225.25">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xl="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" viewBox="184 268 393.5 254.5" width="393.5" height="254.5">
   <defs>
     <font-face font-family="Helvetica Neue" font-size="14" panose-1="2 0 5 3 0 0 0 2 0 4" units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0" x-height="517" cap-height="714" ascent="951.9958" descent="-212.99744" font-weight="400">
       <font-face-src>
         <font-face-name name="HelveticaNeue"/>
       </font-face-src>
     </font-face>
+    <font-face font-family="Helvetica Neue" font-size="16" panose-1="2 0 5 3 0 0 0 2 0 4" units-per-em="1000" underline-position="-100" underline-thickness="50" slope="0" x-height="517" cap-height="714" ascent="951.9958" descent="-212.99744" font-weight="400">
+      <font-face-src>
+        <font-face-name name="HelveticaNeue"/>
+      </font-face-src>
+    </font-face>
   </defs>
   <metadata> Produced by OmniGraffle 7.10.2 
-    <dc:date>2019-07-29 13:03:33 +0000</dc:date>
+    <dc:date>2019-07-29 18:52:24 +0000</dc:date>
   </metadata>
-  <g id="Canvas_1" fill="none" fill-opacity="1" stroke="none" stroke-opacity="1" stroke-dasharray="none">
+  <g id="Canvas_1" stroke-dasharray="none" stroke="none" stroke-opacity="1" fill="none" fill-opacity="1">
     <title>Canvas 1</title>
     <g id="Canvas_1: Layer 1">
       <title>Layer 1</title>
@@ -273,6 +278,22 @@
         <path d="M 459.5 337 L 468.5 337 C 471.5 337 473 337 474.8 337.62 C 476.3 338.24 477.8 339.79 478.4 341.34 C 479 343.2 479 344.75 479 347.85 L 479 357.15 C 479 360.25 479 361.8 478.4 363.66 C 477.8 365.21 476.3 366.76 474.8 367.38 C 473 368 471.5 368 468.5 368 L 459.5 368 C 456.5 368 455 368 453.2 367.38 C 451.7 366.76 450.2 365.21 449.6 363.66 C 449 361.8 449 360.25 449 357.15 L 449 347.85 C 449 344.75 449 343.2 449.6 341.34 C 450.2 339.79 451.7 338.24 453.2 337.62 C 455 337 456.5 337 459.5 337 M 459.5 337" stroke="gray" stroke-linecap="round" stroke-linejoin="round" stroke-width="1"/>
         <text transform="translate(460.108 344)" fill="black">
           <tspan font-family="Helvetica Neue" font-size="14" font-weight="400" fill="black" x="0" y="13">1</tspan>
+        </text>
+      </g>
+      <g id="Line_91">
+        <line x1="195" y1="297" x2="340" y2="297.5" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3"/>
+      </g>
+      <g id="Line_92">
+        <line x1="421" y1="297" x2="566" y2="297.5" stroke="black" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.3"/>
+      </g>
+      <g id="Graphic_94">
+        <text transform="translate(218.8 273)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="3623768e-19" y="15">training data</tspan>
+        </text>
+      </g>
+      <g id="Graphic_95">
+        <text transform="translate(434 273)" fill="black">
+          <tspan font-family="Helvetica Neue" font-size="16" font-weight="400" fill="black" x="21316282e-20" y="15">unknown sample</tspan>
         </text>
       </g>
     </g>

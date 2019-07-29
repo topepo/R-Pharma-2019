@@ -224,7 +224,7 @@ Most similarity measures can be described using 2x2 cross-tabulations and typica
 include_graphics("images/similarity-data.svg")
 ```
 
-A 2x2 table is made for each sample in the training set:
+A _column-wise_ 2x2 table is made for each sample in the training set:
 
 ```{r sim-results, echo = FALSE}
 include_graphics("images/similarity-results.svg")
