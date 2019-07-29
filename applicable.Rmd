@@ -1,0 +1,306 @@
+---
+title: "This one is not like the others: Applicability Domain methods"
+author: Max Kuhn (RStudio) and Marly Cormar (University of Florida) 
+output:
+  xaringan::moon_reader:
+    css: ["mtheme_max.css", "fonts_mtheme_max.css"]  
+    self_contained: false
+    lib_dir: libs
+    nature:
+      ratio: '16:9'
+      highlightLanguage: R
+      countIncrementalSlides: false   
+---
+
+```{r startup, include = FALSE, message = FALSE, warning = FALSE}
+library(tidymodels)
+library(applicable)
+library(QSARdata)
+data(MeltingPoint)
+thm <- theme_bw() +
+  theme(
+    panel.background = element_rect(fill = "transparent", colour = NA),
+    plot.background = element_rect(fill = "transparent", colour = NA),
+    legend.position = "top",
+    legend.background = element_rect(fill = "transparent", colour = NA),
+    legend.key = element_rect(fill = "transparent", colour = NA)
+  )
+theme_set(thm)
+
+library(knitr)
+
+opts_chunk$set(
+  fig.align = 'center',
+  dev = 'svg',
+  dev.args = list(bg = "transparent"),
+  fig.path = "images/")
+```
+
+
+# How models might be used
+
+.pull-left[
+Computational models are sometimes given interfaces that let the end-user directly interact with the outputs. 
+
+In Quantitative structure–activity relationship (QSAR) modeling, workflows might look like: 
+
+<img src="images/interfaces.png" width="90%" style="display: block; margin: auto;">
+
+
+]
+.pull-right[
+Advantages: 
+
+ * No middle man
+ 
+ * Empowers scientists
+ 
+ * Usually fast and standardizes the inputs
+ 
+Disadvantages:
+
+ * The model will always produce a number _whether it was a good idea or not_. 
+]
+
+---
+
+# Is the model _applicable_ for new samples?
+
+.pull-left[
+
+```{r tr-set-1, warning = FALSE, echo = FALSE}
+set.seed(134)
+tr_data <- 
+  recipe(~ ., data = MP_Descriptors) %>% 
+  step_nzv(all_predictors()) %>% 
+  step_YeoJohnson(all_predictors()) %>% 
+  step_normalize(all_predictors()) %>% 
+  step_pca(all_predictors(), num_comp = 2) %>% 
+  prep() %>% 
+  juice() 
+
+rng <- extendrange(c(tr_data$PC1, tr_data$PC2))
+
+p_tr <- 
+  ggplot(tr_data, aes(x = PC1, y = PC2)) + 
+  geom_point() + 
+  xlim(rng) + 
+  ylim(rng) + 
+  xlab("Predictor A") + 
+  ylab("Predictor B") + 
+  coord_equal() + 
+  ggtitle("Your Training Set")
+print(p_tr)
+```
+
+]
+.pull-right[
+```{r unk-1, warning = FALSE, echo = FALSE}
+nice_point <- data.frame(PC1 = 0, PC2 = 0)
+
+p_tr_2 <- 
+  ggplot(tr_data, aes(x = PC1, y = PC2)) + 
+  geom_point(alpha = .1) + 
+  xlim(rng) + 
+  ylim(rng) + 
+  xlab("Predictor A") + 
+  ylab("Predictor B") + 
+  coord_equal() + 
+  ggtitle("Your Training Set") + 
+  geom_point(data = nice_point, col = "red", cex = 5) + 
+  ggtitle("Where you think your new point is at")
+  
+print(p_tr_2)
+```
+]
+
+
+---
+
+# Is the model _applicable_ for new samples?
+
+.pull-left[
+
+```{r tr-set-2, warning = FALSE, echo = FALSE}
+print(p_tr)
+```
+
+]
+.pull-right[
+```{r unk-2, warning = FALSE, echo = FALSE}
+bad_point <- data.frame(PC1 = -25, PC2 = 25)
+
+p_tr_3 <- 
+  ggplot(tr_data, aes(x = PC1, y = PC2)) + 
+  geom_point(alpha = .1) + 
+  xlim(rng) + 
+  ylim(rng) + 
+  xlab("Predictor A") + 
+  ylab("Predictor B") + 
+  coord_equal() + 
+  ggtitle("Your Training Set") + 
+  geom_point(data = bad_point, col = "red", cex = 5) + 
+  ggtitle("But maybe it's here")
+  
+print(p_tr_3)
+```
+]
+
+
+---
+layout: false
+class: inverse, middle, center
+
+# Q: How do we quantify this? 
+
+
+---
+layout: false
+class: inverse, middle, center
+
+# A: It depends!
+
+---
+
+# Methods for estimating the applicability domain
+
+ * Principal component analysis
+ 
+ * The leverage statistic (aka Hat value) $hat = z'(X'X)^{-1}z$
+ 
+ * Distance and data depth methods
+ 
+ * Simple box constraints
+ 
+ * Similarity statistics (binary predictors only)
+
+
+
+---
+
+# PCA example 
+
+
+
+---
+
+# PCA example 
+
+
+
+---
+
+# PCA example 
+
+
+
+---
+
+# PCA example 
+
+
+
+---
+
+# Similarity methods
+
+Similarity statistics can be used to compare data sets where all of the predictors are binary
+
+Some common measures are:
+
+ * Jaccard
+ * Tanimoto
+ * cosine 
+
+Most similarity measures can be described using 2x2 cross-tabulations and typically ignore samples where no events/positives occurred. 
+
+ 
+---
+
+# Comparing a new sample to the training set
+
+.pull-left[
+```{r sim-data, echo = FALSE}
+include_graphics("images/similarity-data.svg")
+```
+
+A 2x2 table is made for each sample in the training set:
+
+```{r sim-results, echo = FALSE}
+include_graphics("images/similarity-results.svg")
+```
+
+]
+.pull-right[
+
+For a training set of since _n_, there are _n_ similarity statistics for each new sample.
+
+ * These can be summarized via the mean or a quantile
+ 
+We want 
+
+* **within-training** set similarity to be low (i.e. diverse) but 
+
+* **unknown-to-training** similarity to be high
+
+]
+
+
+---
+
+# Similarity example
+
+
+
+.pull-left[
+The example data is from two QSAR data sets where binary fingerprints are used as predictors. 
+
+.code70[
+
+```{r options, include = FALSE}
+options(width = 55)
+```
+
+```{r binary-tr}
+data(qsar_binary)
+
+jaccard_sim <- apd_similarity(binary_tr)
+jaccard_sim
+```
+
+]
+
+]
+.pull-right[
+```{r binary-plot, fig.height = 4}
+autoplot(jaccard_sim)
+```
+
+This was _not_ a diverse training set. 
+
+]
+
+
+
+---
+
+# Scoring new samples
+
+.pull-left[
+```{r binary-score}
+score(jaccard_sim, binary_unk)
+```
+]
+.pull-right[
+`similarity_pctl` is actually in _percent units_ so these samples are very dissimilar from the original data.
+
+For the first sample, for a score of 0.128, only 0.128% of training set samples were less diverse than this value. 
+
+Maybe don't rely on this prediction so much.  
+
+]
+
+
+
+
+

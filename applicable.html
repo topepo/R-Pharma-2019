@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>This one is not like the others: Applicability Domain methods</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Max Kuhn (RStudio) and Marly Cormar (University of Florida)" />
+    <link rel="stylesheet" href="mtheme_max.css" type="text/css" />
+    <link rel="stylesheet" href="fonts_mtheme_max.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# This one is not like the others: Applicability Domain methods
+### Max Kuhn (RStudio) and Marly Cormar (University of Florida)
+
+---
+
+
+
+
+
+# How models might be used
+
+.pull-left[
+Computational models are sometimes given interfaces that let the end-user directly interact with the outputs. 
+
+In Quantitative structure–activity relationship (QSAR) modeling, workflows might look like: 
+
+&lt;img src="images/interfaces.png" width="90%" style="display: block; margin: auto;"&gt;
+
+
+]
+.pull-right[
+Advantages: 
+
+ * No middle man
+ 
+ * Empowers scientists
+ 
+ * Usually fast and standardizes the inputs
+ 
+Disadvantages:
+
+ * The model will always produce a number _whether it was a good idea or not_. 
+]
+
+---
+
+# Is the model _applicable_ for new samples?
+
+.pull-left[
+
+&lt;img src="images/tr-set-1-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+.pull-right[
+&lt;img src="images/unk-1-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+
+# Is the model _applicable_ for new samples?
+
+.pull-left[
+
+&lt;img src="images/tr-set-2-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+.pull-right[
+&lt;img src="images/unk-2-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+layout: false
+class: inverse, middle, center
+
+# Q: How do we quantify this? 
+
+
+---
+layout: false
+class: inverse, middle, center
+
+# A: It depends!
+
+---
+
+# Methods for estimating the applicability domain
+
+ * Principal component analysis
+ 
+ * The leverage statistic (aka Hat value) `\(hat = z'(X'X)^{-1}z\)`
+ 
+ * Distance and data depth methods
+ 
+ * Simple box constraints
+ 
+ * Similarity statistics (binary predictors only)
+
+
+
+---
+
+# PCA example 
+
+
+
+---
+
+# PCA example 
+
+
+
+---
+
+# PCA example 
+
+
+
+---
+
+# PCA example 
+
+
+
+---
+
+# Similarity methods
+
+Similarity statistics can be used to compare data sets where all of the predictors are binary
+
+Some common measures are:
+
+ * Jaccard
+ * Tanimoto
+ * cosine 
+
+Most similarity measures can be described using 2x2 cross-tabulations and typically ignore samples where no events/positives occurred. 
+
+ 
+---
+
+# Comparing a new sample to the training set
+
+.pull-left[
+&lt;img src="images/similarity-data.svg" style="display: block; margin: auto;" /&gt;
+
+A 2x2 table is made for each sample in the training set:
+
+&lt;img src="images/similarity-results.svg" style="display: block; margin: auto;" /&gt;
+
+]
+.pull-right[
+
+For a training set of since _n_, there are _n_ similarity statistics for each new sample.
+
+ * These can be summarized via the mean or a quantile
+ 
+We want 
+
+* **within-training** set similarity to be low (i.e. diverse) but 
+
+* **unknown-to-training** similarity to be high
+
+]
+
+
+---
+
+# Similarity example
+
+
+
+.pull-left[
+The example data is from two QSAR data sets where binary fingerprints are used as predictors. 
+
+.code70[
+
+
+
+
+```r
+data(qsar_binary)
+
+jaccard_sim &lt;- apd_similarity(binary_tr)
+```
+
+```
+## Warning: The following variables had zero variance and
+## were removed: pred38, pred40, pred44, pred49
+```
+
+```r
+jaccard_sim
+```
+
+```
+## Applicability domain via similarity
+## Reference data were 45 variables collected on 3796 data points.
+## New data summarized using the mean.
+```
+
+]
+
+]
+.pull-right[
+
+```r
+autoplot(jaccard_sim)
+```
+
+&lt;img src="images/binary-plot-1.svg" style="display: block; margin: auto;" /&gt;
+
+This was _not_ a diverse training set. 
+
+]
+
+
+
+---
+
+# Scoring new samples
+
+.pull-left[
+
+```r
+score(jaccard_sim, binary_unk)
+```
+
+```
+## # A tibble: 80 x 2
+##    similarity similarity_pctl
+##         &lt;dbl&gt;           &lt;dbl&gt;
+##  1     0.128           0.0519
+##  2     0.157           0.559 
+##  3     0.112           0.0487
+##  4     0.0949          0.0453
+##  5     0.139           0.553 
+##  6     0.142           0.554 
+##  7     0.239           0.675 
+##  8     0.0783          0.0420
+##  9     0.172           0.565 
+## 10     0.0829          0.0429
+## # … with 70 more rows
+```
+]
+.pull-right[
+`similarity_pctl` is actually in _percent units_ so these samples are very dissimilar from the original data.
+
+For the first sample, for a score of 0.128, only 0.128% of training set samples were less diverse than this value. 
+
+Maybe don't rely on this prediction so much.  
+
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"ratio": "16:9",
+"highlightLanguage": "R",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();</script>
+
+<script>
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
