@@ -90,40 +90,152 @@ class: inverse, middle, center
 
 # Methods for estimating the applicability domain
 
+Implemented:
+
  * Principal component analysis
  
  * The leverage statistic (aka Hat value) `\(hat = z'(X'X)^{-1}z\)`
+
+ * Similarity statistics (binary predictors only)
+ 
+Upcoming: 
  
  * Distance and data depth methods
  
  * Simple box constraints
  
- * Similarity statistics (binary predictors only)
+ * One-class classification models
+ 
+ * Anomaly detection tools
+
+
+---
+
+# Principal Component Analysis
+
+.pull-left[
+* A dimensionality reduction method that created linear combinations of the original variables.
+
+* Fewer PCA components are usually required to preserve nearly all of the information in the predictors.
+
+  * The first component captures the most variability in the data.
+
+  * The second captures the most of what was left over and so on. 
+]
+.pull-right[
+* The PCA components are guaranteed to be uncorrelated with one another.
+
+* It is a good idea to normalize the predictors to the same distribution.
+
+* Transformation of the data to more symmetric distributions can also be helpful.
+
+* We'll focus on PCA to define the applicability domain for a training set that contains numeric predictors. 
+]
 
 
 
 ---
 
-# PCA example 
+# PCA example  
+
+We'll use the cheminformatic data set `Mutagen` for predicting toxicity from chemical structures:
+
+.pull-left[
 
 
+```r
+library(tidymodels)
+library(QSARdata)
+
+data(Mutagen)
+
+# training set is 4330 x 1579
+mutagen_tr &lt;- Mutagen_Dragon %&gt;% slice(-(1:5))
+
+# we'll treat these as unknowns
+mutagen_unk &lt;- Mutagen_Dragon %&gt;% slice(1:5)
+
+# pre-procesing options
+qsar_rec &lt;- 
+  recipe(~ ., data = mutagen_tr) %&gt;% 
+  step_nzv(all_predictors()) %&gt;% 
+  step_YeoJohnson(all_predictors()) %&gt;% 
+  step_normalize(all_predictors())
+```
+]
+.pull-right[
+
+
+```r
+library(applicable)
+
+mutagen_domain &lt;- apd_pca(qsar_rec, data = mutagen_tr)
+mutagen_domain
+```
+
+```
+## # Predictors:
+##    1579
+## # Principal Components:
+##    104 components were needed
+##    to capture at least 95% of the
+##    total variation in the predictors.
+```
+
+The distributions of the PCS scores vary from dataset-to-dataset. 
+
+Let's first look at the training set distributions of the first few components.
+]
 
 ---
 
 # PCA example 
 
+.pull-left[
 
+Let's look at the empirical distribution function of the first 4 components
+
+
+```r
+autoplot(mutagen_domain, 1:4)
+```
+
+&lt;img src="images/pca-plot-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
+
+]
+.pull-right[
+
+The distance from the center of the training set can be used as a single metric: 
+
+
+```r
+autoplot(mutagen_domain, distance)
+```
+
+&lt;img src="images/distance-plot-1.svg" width="60%" style="display: block; margin: auto;" /&gt;
+]
 
 ---
 
-# PCA example 
+# Scoring new samples
 
 
 
----
+```r
+score(mutagen_domain, mutagen_unk) %&gt;% 
+  select(matches("PC00[1-4]"), contains("dist"))
+```
 
-# PCA example 
-
+```
+## # A tibble: 5 x 10
+##   PC001  PC002   PC003  PC004 PC001_pctl PC002_pctl PC003_pctl PC004_pctl distance distance_pctl
+##   &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;         &lt;dbl&gt;
+## 1  27.7   1.01   8.51   6.91        89.3       48.1      86.5       85.1      34.9          70.0
+## 2 -11.9   5.71  -0.413  2.36        33.2       67.2      46.3       63.6      26.6          37.9
+## 3  13.6   3.29 -16.2   -8.95        68.9       56.9       2.33       9.89     29.3          48.7
+## 4 -17.9 -12.5   -0.337  0.678       25.1       10.9      46.6       52.5      26.7          38.3
+## 5 -25.6   8.01  -5.95  -1.94        16.0       75.8      22.6       34.8      42.2          83.3
+```
 
 
 ---
@@ -175,7 +287,7 @@ We want
 
 
 .pull-left[
-The example data is from two QSAR data sets where binary fingerprints are used as predictors. 
+We use the same data set and split but focus on a set of fingerprint predictors:
 
 .code70[
 
@@ -186,20 +298,12 @@ The example data is from two QSAR data sets where binary fingerprints are used a
 data(qsar_binary)
 
 jaccard_sim &lt;- apd_similarity(binary_tr)
-```
-
-```
-## Warning: The following variables had zero variance and
-## were removed: pred38, pred40, pred44, pred49
-```
-
-```r
 jaccard_sim
 ```
 
 ```
 ## Applicability domain via similarity
-## Reference data were 45 variables collected on 3796 data points.
+## Reference data were 67 variables collected on 4330 data points.
 ## New data summarized using the mean.
 ```
 
@@ -214,7 +318,7 @@ autoplot(jaccard_sim)
 
 &lt;img src="images/binary-plot-1.svg" style="display: block; margin: auto;" /&gt;
 
-This was _not_ a diverse training set. 
+This was a fairly diverse training set. 
 
 ]
 
@@ -231,28 +335,20 @@ score(jaccard_sim, binary_unk)
 ```
 
 ```
-## # A tibble: 80 x 2
-##    similarity similarity_pctl
-##         &lt;dbl&gt;           &lt;dbl&gt;
-##  1     0.128           0.0519
-##  2     0.157           0.559 
-##  3     0.112           0.0487
-##  4     0.0949          0.0453
-##  5     0.139           0.553 
-##  6     0.142           0.554 
-##  7     0.239           0.675 
-##  8     0.0783          0.0420
-##  9     0.172           0.565 
-## 10     0.0829          0.0429
-## # … with 70 more rows
+## # A tibble: 5 x 2
+##   similarity similarity_pctl
+##        &lt;dbl&gt;           &lt;dbl&gt;
+## 1     0.376            49.8 
+## 2     0.284            13.5 
+## 3     0.218             6.46
+## 4     0.452           100   
+## 5     0.0971            5.59
 ```
 ]
 .pull-right[
-`similarity_pctl` is actually in _percent units_ so these samples are very dissimilar from the original data.
+Samples 3 and 5 are definitely extrapolations based on these predictors. 
 
-For the first sample, for a score of 0.128, only 0.128% of training set samples were less diverse than this value. 
-
-Maybe don't rely on this prediction so much.  
+Maybe don't rely on these two predictions so much.
 
 ]
     </textarea>

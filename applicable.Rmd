@@ -28,6 +28,7 @@ thm <- theme_bw() +
 theme_set(thm)
 
 library(knitr)
+options(width = 110)
 
 opts_chunk$set(
   fig.align = 'center',
@@ -164,40 +165,123 @@ class: inverse, middle, center
 
 # Methods for estimating the applicability domain
 
+Implemented:
+
  * Principal component analysis
  
  * The leverage statistic (aka Hat value) $hat = z'(X'X)^{-1}z$
+
+ * Similarity statistics (binary predictors only)
+ 
+Upcoming: 
  
  * Distance and data depth methods
  
  * Simple box constraints
  
- * Similarity statistics (binary predictors only)
+ * One-class classification models
+ 
+ * Anomaly detection tools
+
+
+---
+
+# Principal Component Analysis
+
+.pull-left[
+* A dimensionality reduction method that created linear combinations of the original variables.
+
+* Fewer PCA components are usually required to preserve nearly all of the information in the predictors.
+
+  * The first component captures the most variability in the data.
+
+  * The second captures the most of what was left over and so on. 
+]
+.pull-right[
+* The PCA components are guaranteed to be uncorrelated with one another.
+
+* It is a good idea to normalize the predictors to the same distribution.
+
+* Transformation of the data to more symmetric distributions can also be helpful.
+
+* We'll focus on PCA to define the applicability domain for a training set that contains numeric predictors. 
+]
 
 
 
 ---
 
-# PCA example 
+# PCA example  
 
+We'll use the cheminformatic data set `Mutagen` for predicting toxicity from chemical structures:
 
+.pull-left[
+
+```{r qsar-import}
+library(tidymodels)
+library(QSARdata)
+
+data(Mutagen)
+
+# training set is 4330 x 1579
+mutagen_tr <- Mutagen_Dragon %>% slice(-(1:5))
+
+# we'll treat these as unknowns
+mutagen_unk <- Mutagen_Dragon %>% slice(1:5)
+
+# pre-procesing options
+qsar_rec <- 
+  recipe(~ ., data = mutagen_tr) %>% 
+  step_nzv(all_predictors()) %>% 
+  step_YeoJohnson(all_predictors()) %>% 
+  step_normalize(all_predictors())
+```
+]
+.pull-right[
+
+```{r appl}
+library(applicable)
+
+mutagen_domain <- apd_pca(qsar_rec, data = mutagen_tr)
+mutagen_domain
+```
+
+The distributions of the PCS scores vary from dataset-to-dataset. 
+
+Let's first look at the training set distributions of the first few components.
+]
 
 ---
 
 # PCA example 
 
+.pull-left[
 
+Let's look at the empirical distribution function of the first 4 components
+
+```{r pca-plot, fig.width=6, fig.height=3,  out.width = '100%', fig.align='center', dev = 'svg', dev.args = list(bg = "transparent")}
+autoplot(mutagen_domain, 1:4)
+```
+
+]
+.pull-right[
+
+The distance from the center of the training set can be used as a single metric: 
+
+```{r distance-plot, fig.width=4, fig.height=3,  out.width = '60%', fig.align='center', dev = 'svg', dev.args = list(bg = "transparent")}
+autoplot(mutagen_domain, distance)
+```
+]
 
 ---
 
-# PCA example 
+# Scoring new samples
 
 
-
----
-
-# PCA example 
-
+```{r score}
+score(mutagen_domain, mutagen_unk) %>% 
+  select(matches("PC00[1-4]"), contains("dist"))
+```
 
 
 ---
@@ -253,7 +337,7 @@ We want
 
 
 .pull-left[
-The example data is from two QSAR data sets where binary fingerprints are used as predictors. 
+We use the same data set and split but focus on a set of fingerprint predictors:
 
 .code70[
 
@@ -276,7 +360,7 @@ jaccard_sim
 autoplot(jaccard_sim)
 ```
 
-This was _not_ a diverse training set. 
+This was a fairly diverse training set. 
 
 ]
 
@@ -292,15 +376,9 @@ score(jaccard_sim, binary_unk)
 ```
 ]
 .pull-right[
-`similarity_pctl` is actually in _percent units_ so these samples are very dissimilar from the original data.
+Samples 3 and 5 are definitely extrapolations based on these predictors. 
 
-For the first sample, for a score of 0.128, only 0.128% of training set samples were less diverse than this value. 
-
-Maybe don't rely on this prediction so much.  
+Maybe don't rely on these two predictions so much.
 
 ]
-
-
-
-
 
