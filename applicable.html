@@ -147,10 +147,43 @@ Upcoming:
 ]
 
 
+---
+
+# Principal Component Analysis
+
+.pull-left[
+
+&lt;img src="images/tr-set-3-1.svg" style="display: block; margin: auto;" /&gt;
+
+]
+.pull-right[
+
+&lt;img src="images/tr-pca-1.svg" style="display: block; margin: auto;" /&gt;
+]
+
 
 ---
 
-# PCA example  
+# Principal Component Analysis Scoring
+
+.pull-left[
+
+The new PCA scores reflect 1D changes while the distance to center captures all PC values. 
+
+&lt;img src="images/pca-score-plot-1-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+]
+.pull-right[
+
+Our reference distirbution is based on the within-training results. 
+
+&lt;img src="images/pca-dist-ref-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+]
+
+
+---
+
+# Mutagenicity example  
 
 We'll use the cheminformatic data set `Mutagen` for predicting toxicity from chemical structures:
 
@@ -203,15 +236,15 @@ Let's first look at the training set distributions of the first few components.
 
 ---
 
-# PCA example 
+# Mutagenicity example 
 
 .pull-left[
 
-Let's look at the empirical distribution function of the first 4 components
+Let's look at the empirical distribution function of the first 2 components
 
 
 ```r
-autoplot(mutagen_domain, 1:4)
+autoplot(mutagen_domain, 1:2)
 ```
 
 &lt;img src="images/pca-plot-1.svg" width="100%" style="display: block; margin: auto;" /&gt;
@@ -233,23 +266,45 @@ autoplot(mutagen_domain, distance)
 
 # Scoring new samples
 
-
+.pull-left[
 
 ```r
 score(mutagen_domain, mutagen_unk) %&gt;% 
-  select(matches("PC00[1-4]"), contains("dist"))
+  select(matches("PC00[1-2]"))
 ```
 
 ```
-## # A tibble: 5 x 10
-##   PC001  PC002   PC003  PC004 PC001_pctl PC002_pctl PC003_pctl PC004_pctl distance distance_pctl
-##   &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;    &lt;dbl&gt;         &lt;dbl&gt;
-## 1  27.7   1.01   8.51   6.91        89.3       48.1      86.5       85.1      34.9          70.0
-## 2 -11.9   5.71  -0.413  2.36        33.2       67.2      46.3       63.6      26.6          37.9
-## 3  13.6   3.29 -16.2   -8.95        68.9       56.9       2.33       9.89     29.3          48.7
-## 4 -17.9 -12.5   -0.337  0.678       25.1       10.9      46.6       52.5      26.7          38.3
-## 5 -25.6   8.01  -5.95  -1.94        16.0       75.8      22.6       34.8      42.2          83.3
+## # A tibble: 5 x 4
+##   PC001  PC002 PC001_pctl PC002_pctl
+##   &lt;dbl&gt;  &lt;dbl&gt;      &lt;dbl&gt;      &lt;dbl&gt;
+## 1  27.7   1.01       89.3       48.1
+## 2 -11.9   5.71       33.2       67.2
+## 3  13.6   3.29       68.9       56.9
+## 4 -17.9 -12.5        25.1       10.9
+## 5 -25.6   8.01       16.0       75.8
 ```
+
+]
+.pull-right[
+
+```r
+score(mutagen_domain, mutagen_unk) %&gt;% 
+  select(contains("dist"))
+```
+
+```
+## # A tibble: 5 x 2
+##   distance distance_pctl
+##      &lt;dbl&gt;         &lt;dbl&gt;
+## 1     34.9          70.0
+## 2     26.6          37.9
+## 3     29.3          48.7
+## 4     26.7          38.3
+## 5     42.2          83.3
+```
+
+]
+
 
 
 ---

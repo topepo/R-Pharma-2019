@@ -15,6 +15,7 @@ library(tidymodels)
 library(applicable)
 library(QSARdata)
 data(MeltingPoint)
+data(two_class_dat, package = "rsample")
 thm <- theme_bw() +
   theme(
     panel.background = element_rect(fill = "transparent", colour = NA),
@@ -91,26 +92,15 @@ Disadvantages:
 .pull-left[
 
 ```{r tr-set-1, warning = FALSE, echo = FALSE}
-set.seed(134)
-tr_data <- 
-  recipe(~ ., data = MP_Descriptors) %>% 
-  step_nzv(all_predictors()) %>% 
-  step_YeoJohnson(all_predictors()) %>% 
-  step_normalize(all_predictors()) %>% 
-  step_pca(all_predictors(), num_comp = 2) %>% 
-  prep() %>% 
-  juice() 
-
-rng <- extendrange(c(tr_data$PC1, tr_data$PC2))
+rng <- extendrange(c(two_class_dat$A, two_class_dat$B))
 
 p_tr <- 
-  ggplot(tr_data, aes(x = PC1, y = PC2)) + 
+  ggplot(two_class_dat, aes(x = A, y = B)) + 
   geom_point() + 
   xlim(rng) + 
   ylim(rng) + 
   xlab("Predictor A") + 
   ylab("Predictor B") + 
-  coord_equal() + 
   ggtitle("Your Training Set")
 print(p_tr)
 ```
@@ -118,17 +108,15 @@ print(p_tr)
 ]
 .pull-right[
 ```{r unk-1, warning = FALSE, echo = FALSE}
-nice_point <- data.frame(PC1 = 0, PC2 = 0)
+nice_point <- data.frame(A = 2, B = 1.5)
 
 p_tr_2 <- 
-  ggplot(tr_data, aes(x = PC1, y = PC2)) + 
-  geom_point(alpha = .1) + 
+  ggplot(two_class_dat, aes(x = A, y = B)) + 
+  geom_point(alpha = .2) + 
   xlim(rng) + 
   ylim(rng) + 
   xlab("Predictor A") + 
   ylab("Predictor B") + 
-  coord_equal() + 
-  ggtitle("Your Training Set") + 
   geom_point(data = nice_point, col = "red", cex = 5) + 
   ggtitle("Where you think your new point is at")
   
@@ -150,16 +138,15 @@ print(p_tr)
 ]
 .pull-right[
 ```{r unk-2, warning = FALSE, echo = FALSE}
-bad_point <- data.frame(PC1 = -25, PC2 = 25)
+bad_point <- data.frame(A = 1, B = 3)
 
 p_tr_3 <- 
-  ggplot(tr_data, aes(x = PC1, y = PC2)) + 
-  geom_point(alpha = .1) + 
+ggplot(two_class_dat, aes(x = A, y = B)) + 
+  geom_point(alpha = .2) + 
   xlim(rng) + 
   ylim(rng) + 
   xlab("Predictor A") + 
   ylab("Predictor B") + 
-  coord_equal() + 
   ggtitle("Your Training Set") + 
   geom_point(data = bad_point, col = "red", cex = 5) + 
   ggtitle("But maybe it's here")
@@ -229,10 +216,100 @@ Upcoming:
 ]
 
 
+---
+
+# Principal Component Analysis
+
+.pull-left[
+
+```{r tr-set-3, warning = FALSE, echo = FALSE}
+print(p_tr)
+```
+
+]
+.pull-right[
+
+```{r tr-pca, warning = FALSE, echo = FALSE}
+ex_pca <- prcomp(two_class_dat[, 1:2], center = TRUE, scale. = TRUE)
+ex_pca_dat <- as_tibble(ex_pca$x)
+pca_rng <- extendrange(c(ex_pca_dat$PC1, ex_pca_dat$PC2))
+pca_bad <- as_tibble(predict(ex_pca, bad_point))
+pca_nice <- as_tibble(predict(ex_pca, nice_point))
+
+p_pca_3 <-
+  ggplot(ex_pca_dat, aes(x = PC1, y = PC2)) +
+  geom_point(alpha = .2) +
+  xlim(pca_rng) +
+  ylim(pca_rng) +
+  xlab("PC 1") +
+  ylab("PC 2") +
+  geom_point(data = pca_bad, col = "red", cex = 5) +
+  geom_point(data = pca_nice, col = "green", cex = 5) + 
+  ggtitle("Corresponding PCA Scores")
+
+print(p_pca_3)
+
+```
+]
+
 
 ---
 
-# PCA example  
+# Principal Component Analysis Scoring
+
+.pull-left[
+
+The new PCA scores reflect 1D changes while the distance to center captures all PC values. 
+
+```{r pca-score-plot-1, warning = FALSE, echo = FALSE,  out.width = '80%'}
+ggplot(ex_pca_dat, aes(x = PC1, y = PC2)) +
+  geom_point(alpha = .2) +
+  xlim(pca_rng) +
+  ylim(pca_rng) +
+  xlab("PC 1") +
+  ylab("PC 2") +
+  geom_point(data = pca_bad, col = "red", cex = 5) +
+  geom_segment(
+    aes(x = pca_bad$PC1, y = pca_bad$PC2, xend = 0, yend = 0),
+    col = "blue",
+    arrow = arrow(length = unit(0.1, "inches"))
+  ) +
+  geom_segment(
+    aes(x = pca_bad$PC1, y = pca_bad$PC2, xend = 0, yend = pca_bad$PC2),
+    col = "blue",
+    arrow = arrow(length = unit(0.1, "inches"))
+  ) +
+  geom_segment(
+    aes(x = pca_bad$PC1, y = pca_bad$PC2, xend = pca_bad$PC1, yend = 0),
+    col = "blue",
+    arrow = arrow(length = unit(0.1, "inches"))
+  ) 
+```
+
+]
+.pull-right[
+
+Our reference distirbution is based on the within-training results. 
+
+```{r pca-dist-ref, warning = FALSE, echo = FALSE,  out.width = '80%'}
+ggplot(ex_pca_dat, aes(x = PC1, y = PC2)) +
+  geom_point(alpha = .2) +
+  xlim(pca_rng) +
+  ylim(pca_rng) +
+  xlab("PC 1") +
+  ylab("PC 2") +
+  geom_segment(
+    data = ex_pca_dat,
+    aes(xend = 0, yend = 0),
+    col = "blue", alpha = .1
+  )
+```
+]
+
+
+---
+
+# Mutagenicity example  
 
 We'll use the cheminformatic data set `Mutagen` for predicting toxicity from chemical structures:
 
@@ -274,14 +351,14 @@ Let's first look at the training set distributions of the first few components.
 
 ---
 
-# PCA example 
+# Mutagenicity example 
 
 .pull-left[
 
-Let's look at the empirical distribution function of the first 4 components
+Let's look at the empirical distribution function of the first 2 components
 
 ```{r pca-plot, fig.width=6, fig.height=3,  out.width = '100%', fig.align='center', dev = 'svg', dev.args = list(bg = "transparent")}
-autoplot(mutagen_domain, 1:4)
+autoplot(mutagen_domain, 1:2)
 ```
 
 ]
@@ -298,11 +375,21 @@ autoplot(mutagen_domain, distance)
 
 # Scoring new samples
 
-
-```{r score}
+.pull-left[
+```{r score-pca}
 score(mutagen_domain, mutagen_unk) %>% 
-  select(matches("PC00[1-4]"), contains("dist"))
+  select(matches("PC00[1-2]"))
 ```
+
+]
+.pull-right[
+```{r score-dist}
+score(mutagen_domain, mutagen_unk) %>% 
+  select(contains("dist"))
+```
+
+]
+
 
 
 ---
