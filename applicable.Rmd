@@ -1,6 +1,4 @@
 ---
-title: "This one is not like the others: Applicability Domain methods"
-author: Max Kuhn (RStudio) and Marly Cormar (University of Florida) 
 output:
   xaringan::moon_reader:
     css: ["mtheme_max.css", "fonts_mtheme_max.css"]  
@@ -38,6 +36,29 @@ opts_chunk$set(
 ```
 
 
+layout: false
+class: title-slide, middle, center
+
+
+.pull-farleft[
+
+.font180[
+This one is not like the others:<br> Applicability Domain methods
+
+]
+
+Max Kuhn (RStudio)<br>Marly Cormar (University of Florida)
+
+]
+.pull-farright[
+
+```{r doggo, echo = FALSE,  out.width = '90%', fig.align='right'}
+knitr::include_graphics("images/doggo.png")
+```
+
+]
+
+---
 # How models might be used
 
 .pull-left[
@@ -239,7 +260,7 @@ qsar_rec <-
 ]
 .pull-right[
 
-```{r appl}
+```{r appl, cache = TRUE}
 library(applicable)
 
 mutagen_domain <- apd_pca(qsar_rec, data = mutagen_tr)
@@ -345,7 +366,7 @@ We use the same data set and split but focus on a set of fingerprint predictors:
 options(width = 55)
 ```
 
-```{r binary-tr}
+```{r binary-tr, cache = TRUE}
 data(qsar_binary)
 
 jaccard_sim <- apd_similarity(binary_tr)

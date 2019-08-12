@@ -57,6 +57,19 @@ a, a > code {
 .pull-right ~ * {
   clear: both;
 }
+.pull-farleft {
+  float: left;
+  width: 65%;
+}
+.pull-farright {
+  float: right;
+  width: 32%;
+}
+.pull-farright ~ * {
+  clear: both;
+}
+
+
 img, video, iframe {
   max-width: 100%;
 }
