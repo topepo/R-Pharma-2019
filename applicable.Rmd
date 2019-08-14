@@ -425,7 +425,7 @@ include_graphics("images/similarity-results.svg")
 ]
 .pull-right[
 
-For a training set of since _n_, there are _n_ similarity statistics for each new sample.
+For a training set of size _n_, there are _n_ similarity statistics for each new sample.
 
  * These can be summarized via the mean or a quantile
  
