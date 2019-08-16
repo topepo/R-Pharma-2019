@@ -117,7 +117,7 @@ p_tr_2 <-
   ylim(rng) + 
   xlab("Predictor A") + 
   ylab("Predictor B") + 
-  geom_point(data = nice_point, col = "red", cex = 5) + 
+  geom_point(data = nice_point, col = "green", cex = 5, pch = 15) + 
   ggtitle("Where you think your new point is at")
   
 print(p_tr_2)
@@ -173,7 +173,7 @@ class: inverse, middle, center
 
 # Methods for estimating the applicability domain
 
-Implemented:
+Implemented in the `applicable` package:
 
  * Principal component analysis
  
@@ -223,7 +223,11 @@ Upcoming:
 .pull-left[
 
 ```{r tr-set-3, warning = FALSE, echo = FALSE}
-print(p_tr)
+print(
+  p_tr + 
+  geom_point(data = nice_point, col = "green", cex = 5, pch = 15) + 
+  geom_point(data = bad_point, col = "red", cex = 5)
+  )
 ```
 
 ]
@@ -244,7 +248,7 @@ p_pca_3 <-
   xlab("PC 1") +
   ylab("PC 2") +
   geom_point(data = pca_bad, col = "red", cex = 5) +
-  geom_point(data = pca_nice, col = "green", cex = 5) + 
+  geom_point(data = pca_nice, col = "green", cex = 5, pch = 15) + 
   ggtitle("Corresponding PCA Scores")
 
 print(p_pca_3)
@@ -337,7 +341,7 @@ qsar_rec <-
 ]
 .pull-right[
 
-```{r appl, cache = TRUE}
+```{r appl}
 library(applicable)
 
 mutagen_domain <- apd_pca(qsar_rec, data = mutagen_tr)
@@ -360,6 +364,8 @@ Let's look at the empirical distribution function of the first 2 components
 ```{r pca-plot, fig.width=6, fig.height=3,  out.width = '100%', fig.align='center', dev = 'svg', dev.args = list(bg = "transparent")}
 autoplot(mutagen_domain, 1:2)
 ```
+
+Other `dplyr` selectors (e.g. `starts_with()`) can be used.
 
 ]
 .pull-right[
@@ -453,7 +459,7 @@ We use the same data set and split but focus on a set of fingerprint predictors:
 options(width = 55)
 ```
 
-```{r binary-tr, cache = TRUE}
+```{r binary-tr}
 data(qsar_binary)
 
 jaccard_sim <- apd_similarity(binary_tr)
@@ -489,4 +495,17 @@ Samples 3 and 5 are definitely extrapolations based on these predictors.
 Maybe don't rely on these two predictions so much.
 
 ]
+
+
+---
+
+# Thanks!
+
+
+The package is at [`https://github.com/tidymodels/applicable`](https://github.com/tidymodels/applicable).
+
+These slides are at [`https://github.com/topepo/R-Pharma-2019`](https://github.com/topepo/R-Pharma-2019)
+
+
+
 
