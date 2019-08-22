@@ -117,7 +117,7 @@ p_tr_2 <-
   ylim(rng) + 
   xlab("Predictor A") + 
   ylab("Predictor B") + 
-  geom_point(data = nice_point, col = "green", cex = 5, pch = 15) + 
+  geom_point(data = nice_point, col = "blue", cex = 5, pch = 15) + 
   ggtitle("Where you think your new point is at")
   
 print(p_tr_2)
@@ -225,7 +225,7 @@ Upcoming:
 ```{r tr-set-3, warning = FALSE, echo = FALSE}
 print(
   p_tr + 
-  geom_point(data = nice_point, col = "green", cex = 5, pch = 15) + 
+  geom_point(data = nice_point, col = "blue", cex = 5, pch = 15) + 
   geom_point(data = bad_point, col = "red", cex = 5)
   )
 ```
@@ -248,7 +248,7 @@ p_pca_3 <-
   xlab("PC 1") +
   ylab("PC 2") +
   geom_point(data = pca_bad, col = "red", cex = 5) +
-  geom_point(data = pca_nice, col = "green", cex = 5, pch = 15) + 
+  geom_point(data = pca_nice, col = "blue", cex = 5, pch = 15) + 
   ggtitle("Corresponding PCA Scores")
 
 print(p_pca_3)
@@ -501,10 +501,24 @@ Maybe don't rely on these two predictions so much.
 
 # Thanks!
 
+.pull-left[
+
+Thanks to Marly for all of her hard work. 
+
+`applicable` uses Davis Vaughan's `hardhart` package, which made our lives much easier. 
 
 The package is at [`https://github.com/tidymodels/applicable`](https://github.com/tidymodels/applicable).
 
 These slides are at [`https://github.com/topepo/R-Pharma-2019`](https://github.com/topepo/R-Pharma-2019)
+
+]
+.pull-right[
+<img src="images/goodbye.jpg" width = "60%">
+
+]
+
+
+
 
 
 
