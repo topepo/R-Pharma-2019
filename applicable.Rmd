@@ -293,7 +293,7 @@ ggplot(ex_pca_dat, aes(x = PC1, y = PC2)) +
 ]
 .pull-right[
 
-Our reference distirbution is based on the within-training results. 
+Our reference distribution is based on the within-training results. 
 
 ```{r pca-dist-ref, warning = FALSE, echo = FALSE,  out.width = '80%'}
 ggplot(ex_pca_dat, aes(x = PC1, y = PC2)) +
@@ -331,7 +331,7 @@ mutagen_tr <- Mutagen_Dragon %>% slice(-(1:5))
 # we'll treat these as unknowns
 mutagen_unk <- Mutagen_Dragon %>% slice(1:5)
 
-# pre-procesing options
+# pre-processing options
 qsar_rec <- 
   recipe(~ ., data = mutagen_tr) %>% 
   step_nzv(all_predictors()) %>% 
