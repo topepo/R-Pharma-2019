@@ -175,7 +175,7 @@ The new PCA scores reflect 1D changes while the distance to center captures all 
 ]
 .pull-right[
 
-Our reference distirbution is based on the within-training results. 
+Our reference distribution is based on the within-training results. 
 
 &lt;img src="images/pca-dist-ref-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
 ]
@@ -202,7 +202,7 @@ mutagen_tr &lt;- Mutagen_Dragon %&gt;% slice(-(1:5))
 # we'll treat these as unknowns
 mutagen_unk &lt;- Mutagen_Dragon %&gt;% slice(1:5)
 
-# pre-procesing options
+# pre-processing options
 qsar_rec &lt;- 
   recipe(~ ., data = mutagen_tr) %&gt;% 
   step_nzv(all_predictors()) %&gt;% 
